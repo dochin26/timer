@@ -2,7 +2,7 @@
 timer（JS Timer）はJavaScriptで動作するタイマーです。
 
 # 実行方法
-リンク：``https://dochin26.github.io/timer/``
+リンク：[https://dochin26.github.io/timer/](https://dochin26.github.io/timer/)
 
 # 操作方法
 
