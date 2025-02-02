@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>統一タイマー</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    /* 入力欄を大きく表示 */
+    #timeInput {
+      font-size: 200px;
+      text-align: center;
+      width: 1000px;
+      padding: 5px;
+      margin-bottom: 20px;
+      border: none;
+    }
+    button {
+      font-size: 16px;
+      padding: 10px 20px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- 入力と表示を兼用するフィールド -->
+  <input id="timeInput" type="text" value="00:00:000" />
+
+  <!-- ワンタッチ機能 -->
+  <div>
+    <button id="one">1 分</button>
+    <button id="three">3 分</button>
+    <button id="five">5 分</button>
+    <button id="ten">10 分</button>
+  </div>
+
+  <div>
+    <button id="start">開始</button>
+    <button id="stop">停止</button>
+    <button id="reset">リセット</button>
+  </div>
+  
+  <script>
+    // DOM要素の取得
+    const timeInput = document.getElementById('timeInput');
+    const startBtn = document.getElementById('start');
+    const stopBtn = document.getElementById('stop');
+    const resetBtn = document.getElementById('reset');
+
+    const oneBtn = document.getElementById('one');
+    const threeBtn = document.getElementById('three');
+    const fiveBtn = document.getElementById('five');
+    const tenBtn = document.getElementById('ten');
+
+    // タイマー管理用の変数
+    let totalMilliseconds = 0;  // 残り時間（ミリ秒）
+    let timerInterval = null;   // setInterval の返り値
+    let previousTime = null;    // 前回の更新時刻（Date.now()）
+
+    /**
+     * 入力欄の文字列（"mm:ss:ms"）を解析して、ミリ秒単位の時間に変換する関数
+     */
+    function parseTimeInput() {
+      const parts = timeInput.value.split(':');
+      if (parts.length !== 3) {
+        return 0;
+      }
+      const mins = parseInt(parts[0], 10) || 0;
+      const secs = parseInt(parts[1], 10) || 0;
+      const ms   = parseInt(parts[2], 10) || 0;
+      return mins * 60000 + secs * 1000 + ms;
+    }
+
+    /**
+     * totalMilliseconds の値を "mm:ss:ms" の形式に変換して入力欄に表示する関数
+     */
+    function updateDisplay() {
+      let remaining = totalMilliseconds;
+      const mins = Math.floor(remaining / 60000);
+      remaining %= 60000;
+      const secs = Math.floor(remaining / 1000);
+      const ms = remaining % 1000;
+      
+      // 桁数を整形（分、秒は2桁、ミリ秒は3桁）
+      const formattedMins = mins < 10 ? "0" + mins : mins;
+      const formattedSecs = secs < 10 ? "0" + secs : secs;
+      const formattedMs = ms.toString().padStart(3, "0");
+      
+      timeInput.value = `${formattedMins}:${formattedSecs}:${formattedMs}`;
+    }
+
+    /**
+     * 10ミリ秒ごとに実行されるカウントダウン関数
+     */
+    function countdown() {
+      const now = Date.now();
+      if (!previousTime) {
+        previousTime = now;
+      }
+      // 前回からの経過ミリ秒を計算
+      const elapsed = now - previousTime;
+      previousTime = now;
+      
+      totalMilliseconds -= elapsed;
+      
+      if (totalMilliseconds <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        totalMilliseconds = 0;
+        updateDisplay();
+        alert("タイマー終了！");
+        // タイマー終了後は入力欄を再編集可能にする
+        timeInput.disabled = false;
+      } else {
+        updateDisplay();
+      }
+    }
+
+    // 「1分」ワンタッチ
+    oneBtn.addEventListener('click', function() {
+        timeInput.value = '01:00:000';
+    })
+
+    // 「3分」ワンタッチ
+    threeBtn.addEventListener('click', function() {
+        timeInput.value = '03:00:000';
+    })
+
+    // 「5分」ワンタッチ
+    fiveBtn.addEventListener('click', function() {
+        timeInput.value = '05:00:000';
+    })
+
+    // 「10分」ワンタッチ
+    tenBtn.addEventListener('click', function() {
+        timeInput.value = '10:00:000';
+    })
+
+    // 「開始」ボタンの処理
+    startBtn.addEventListener('click', function() {
+      // すでにタイマーが動作中なら何もしない
+      if (timerInterval) return;
+      
+      // 入力欄の値を解析して残り時間を設定
+      totalMilliseconds = parseTimeInput();
+      if (totalMilliseconds <= 0) return;  // 0以下なら処理しない
+      
+      updateDisplay();
+      // タイマー開始中は入力欄の編集を禁止（表示専用にする）
+      timeInput.disabled = true;
+      previousTime = Date.now();
+      timerInterval = setInterval(countdown, 10);
+    });
+
+    // 「停止」ボタンの処理
+    stopBtn.addEventListener('click', function() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        // 停止したら入力欄を編集可能にする
+        timeInput.disabled = false;
+      }
+    });
+
+    // 「リセット」ボタンの処理
+    resetBtn.addEventListener('click', function() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      totalMilliseconds = 0;
+      previousTime = null;
+      // 入力欄を再編集可能にし、初期値に戻す
+      timeInput.disabled = false;
+      timeInput.value = "00:00:000";
+    });
+  </script>
+</body>
+</html>
