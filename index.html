@@ -8,7 +8,7 @@
     body {
       font-family: "Noto Sans JP", serif;
       text-align: center;
-      margin-top: 50px;
+      margin-top: 25px;
     }
     /* 入力欄を大きく表示 */
     #timeInput {
@@ -114,7 +114,7 @@
         timerInterval = null;
         totalMilliseconds = 0;
         updateDisplay();
-        alert("タイマー終了！");
+        setTimeout(alert, 99, "Finish!");
         // タイマー終了後は入力欄を再編集可能にする
         timeInput.disabled = false;
       } else {
